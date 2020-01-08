@@ -1,0 +1,253 @@
+name: A workflow for NX Workspace
+on: push
+
+jobs:
+  initial-setup:
+    name: Initial Setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --ignore-engines --frozen-lockfile
+      - name: setCommands
+        run: |
+          node ./tools/scripts/calculate-commands.js $IS_PR > COMMANDS.txt
+          echo $(cat COMMANDS.txt)
+      - uses: actions/upload-artifact@v1
+        with:
+          name: commands
+          path: COMMANDS.txt
+    env:
+      IS_PR: ${{ github.event_name == 'pull_request' }}
+
+  lint1:
+    name: lint-1 sources
+    needs: initial-setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/download-artifact@v1
+        with:
+          name: commands
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Running affected:lint
+        run: node ./tools/scripts/run-many.js "$(cat commands/COMMANDS.txt)" lint1 lint
+
+  lint2:
+    name: lint-2 sources
+    needs: initial-setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/download-artifact@v1
+        with:
+          name: commands
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Running affected:lint
+        run: node ./tools/scripts/run-many.js "$(cat commands/COMMANDS.txt)" lint2 lint
+
+  lint3:
+    name: lint-3 sources
+    needs: initial-setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/download-artifact@v1
+        with:
+          name: commands
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Running affected:lint
+        run: node ./tools/scripts/run-many.js "$(cat commands/COMMANDS.txt)" lint3 lint
+
+  test1:
+    name: test-1 sources
+    needs: initial-setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/download-artifact@v1
+        with:
+          name: commands
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Running affected:test
+        run: node ./tools/scripts/run-many.js "$(cat commands/COMMANDS.txt)" test1 test
+
+  test2:
+    name: test-2 sources
+    needs: initial-setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/download-artifact@v1
+        with:
+          name: commands
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Running affected:test
+        run: node ./tools/scripts/run-many.js "$(cat commands/COMMANDS.txt)" test2 test
+
+  test3:
+    name: test-3 sources
+    needs: initial-setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/download-artifact@v1
+        with:
+          name: commands
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Running affected:test
+        run: node ./tools/scripts/run-many.js "$(cat commands/COMMANDS.txt)" test3 test
+  # e2e:
+  #   name: E2E tests
+  #   needs: initial-setup
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v1
+  #     - uses: actions/setup-node@v1
+  #       with:
+  #         node-version: '13.x'
+  #     - name: Get yarn cache
+  #       id: yarn-cache
+  #       run: echo "::set-output name=dir::$(yarn cache dir)"
+  #     - uses: actions/cache@v1
+  #       id: cache
+  #       with:
+  #         path: node_modules
+  #         key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-yarn-node-13.6-
+  #     - name: Install Dependencies
+  #       run: yarn install --ignore-engines --frozen-lockfile
+  #     - name: Running affected:e2e
+  #       run: yarn affected:e2e --all
+
+  build1:
+    name: build-1 sources
+    needs: initial-setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/download-artifact@v1
+        with:
+          name: commands
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Running affected:build
+        run: node ./tools/scripts/run-many.js "$(cat commands/COMMANDS.txt)" build1 build
+
+  build2:
+    name: build-2 sources
+    needs: initial-setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/download-artifact@v1
+        with:
+          name: commands
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Running affected:build
+        run: node ./tools/scripts/run-many.js "$(cat commands/COMMANDS.txt)" build2 build
+
+  build3:
+    name: build-3 sources
+    needs: initial-setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '13.x'
+      - uses: actions/download-artifact@v1
+        with:
+          name: commands
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-node-13.6-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-node-13.6-
+      - name: Running affected:build
+        run: node ./tools/scripts/run-many.js "$(cat commands/COMMANDS.txt)" build3 build
